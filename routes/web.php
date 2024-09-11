@@ -6,6 +6,9 @@ use App\Http\Controllers\InputController;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\ResponseContreoller;
 use App\Http\Controllers\CookieController;
+use App\Http\Controllers\RedirectController;
+use App\Http\Controllers\FormController;
+use App\Http\Controllers\SessionController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -85,18 +88,82 @@ Route::post("/input/filter/except", [InputController::class, 'filterExcept']);
 
 Route::post("/input/filter/merge", [InputController::class, 'filterMerge']);
 
-Route::post("/file/upload", [FileController::class, 'upload']);
+Route::post("/file/upload", [FileController::class, 'upload'])
+    ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
 
-Route::get("/response/hello", [ResponseContreoller::class, 'response']);
+Route::prefix('/response')->group(function (){
+    Route::get("/hello", [ResponseContreoller::class, 'response']);
+    Route::get("/header", [ResponseContreoller::class, 'header']);
+    Route::get("/view", [ResponseContreoller::class, 'responseView']);
+    Route::get("/json", [ResponseContreoller::class, 'responseJson']);
+    Route::get("/file", [ResponseContreoller::class, 'responseFile']);
+    Route::get("/download", [ResponseContreoller::class, 'responseDownload']);
+});
 
-Route::get("/response/header", [ResponseContreoller::class, 'header']);
+Route::controller(CookieController::class)->group(function () {
+    Route::get('/cookie/set', 'createCookie');
+    Route::get('/cookie/get', 'getCookie');
+    Route::get('/cookie/clear', 'clearCookie');
+});
 
-Route::get("/response/view", [ResponseContreoller::class, 'responseView']);
+Route::get('/redirect/from', [RedirectController::class, 'redirectFrom']);
+Route::get('/redirect/to', [RedirectController::class, 'redirectTo']);
 
-Route::get("/response/json", [ResponseContreoller::class, 'responseJson']);
+Route::get('/redirect/name', [RedirectController::class, 'redirectName']);
+Route::get('/redirect/name/{name}', [RedirectController::class, 'redirectHello'])->name('redirect-hello');
+Route::get('/redirect/action', [RedirectController::class, 'redirectAction']);
+Route::get('/redirect/away', [RedirectController::class, 'redirectAway']);
 
-Route::get("/response/file", [ResponseContreoller::class, 'responseFile']);
+Route::middleware(['contoh:Yuta,401'])->prefix('/middleware')->group(function () {
+    Route::get('/api', function () {
+        return "OK";
+    });
+});
 
-Route::get("/response/download", [ResponseContreoller::class, 'responseDownload']);
+Route::get('/middleware/group', function () {
+    return "Group";
+})->middleware(['yuta']);
 
-Route::get('/cookie/set', [CookieController::class, 'createCookie']);
+Route::get('/form', [FormController::class, 'form']);
+Route::post('/form', [FormController::class, 'submitForm']);
+
+Route::get('/url/current', function () {
+    return url()->current();
+});
+
+Route::get('/url/named', function () {
+    return route('redirect-hello', ['name' => 'Yuta']);
+});
+
+Route::get('/url/action', function () {
+    return action([FormController::class, 'form']);
+});
+
+Route::get('/session/create', [SessionController::class, 'createSession']);
+Route::get('/session/get', [SessionController::class, 'getSession']);
+
+Route::get('/error/sample', function () {
+    throw new Exception("Error Sample");
+});
+
+Route::get('/error/manual', function () {
+    report(new Exception("Error Manual"));
+    return "Ok
+    ";
+});
+
+Route::get('/error/validation', function () {
+    throw new App\Exceptions\ValidationException("Error Validation");
+});
+
+Route::get('/abort/400', function () {
+    abort(400, "Ups Validation Error");
+});
+
+Route::get('/abort/401', function () {
+    abort(401);
+});
+
+Route::get('/abort/500', function () {
+    abort(500);
+});

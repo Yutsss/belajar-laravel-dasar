@@ -14,4 +14,22 @@ class CookieControllerTest extends TestCase
             ->assertCookie('User-id', 'Yuta')
             ->assertCookie('Is-Member', 'true');
     }
+
+    public function testGetCookie()
+    {
+        $this->withCookies(['User-id' => 'Yuta', 'Is-Member' => 'true'])
+            ->get('/cookie/get')
+            ->assertJson([
+                'userId' => 'Yuta',
+                'isMember' => 'true'
+            ]);
+    }
+
+    public function testClearCookie()
+    {
+        $this->withCookies(['User-id' => 'Yuta', 'Is-Member' => 'true'])
+            ->get('/cookie/clear')
+            ->assertCookieExpired('User-id')
+            ->assertCookieExpired('Is-Member');
+    }
 }

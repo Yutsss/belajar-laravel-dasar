@@ -60,5 +60,4 @@ class ResponseControllerTest extends TestCase
             ->assertHeader('Content-Type', 'image/png')
             ->assertHeader('Content-Disposition', 'attachment; filename=yuta.png');
     }
-
 }
