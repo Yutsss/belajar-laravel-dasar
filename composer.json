@@ -7,6 +7,7 @@
     "require": {
         "php": "^8.2",
         "laravel/framework": "^11.0",
+        "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.9"
     },
     "require-dev": {
@@ -45,7 +46,8 @@
             "@php artisan key:generate --ansi",
             "@php -r \"file_exists('database/database.sqlite') || touch('database/database.sqlite');\"",
             "@php artisan migrate --ansi"
-        ]
+        ],
+        "test": "PHPUnit tests/Unit"
     },
     "extra": {
         "branch-alias": {
